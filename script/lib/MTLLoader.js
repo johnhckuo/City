@@ -549,5 +549,3 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 	}
 
 };
-
-export default THREE.MTLLoader;

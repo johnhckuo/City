@@ -1,20 +1,3 @@
-import '../scss/reset.scss';
-import '../scss/main.scss';
-
-import 'three';
-import 'three/OrbitControls';
-
-import dat from 'dat.gui/build/dat.gui.js'
-import Stats from './lib/Stats.js';
-import OBJLoader from './lib/OBJLoader.js';
-import MTLLoader from './lib/MTLLoader.js';
-
-import './sky.js';
-
-import moon from "../img/moon.jpg";
-import parisOBJ from "../models/Paris2010_0.obj";
-import parisMTL from "../models/Paris2010.mtl";
-
 var scene, camera, renderer, controls, stats, sky;
 var boxSize = 2000;
 var now, hours, minutes, lastMinute;
@@ -85,8 +68,8 @@ function init(){
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = lightQuality;
     sunLight.shadow.mapSize.height = lightQuality;
-    sunLight.shadow.camera.near = boxSize /2 ;    
-    sunLight.shadow.camera.far = boxSize * 2;  
+    sunLight.shadow.camera.near = boxSize /2 ;
+    sunLight.shadow.camera.far = boxSize * 2;
 
     sunLight.shadow.camera.left = -lightRange;
     sunLight.shadow.camera.right = lightRange;
@@ -99,14 +82,14 @@ function init(){
     moonLight.castShadow = true;
     moonLight.shadow.mapSize.width = lightQuality;
     moonLight.shadow.mapSize.height = lightQuality;
-    moonLight.shadow.camera.near = boxSize /2 ;    
-    moonLight.shadow.camera.far = boxSize * 2;  
+    moonLight.shadow.camera.near = boxSize /2 ;
+    moonLight.shadow.camera.far = boxSize * 2;
 
     moonLight.shadow.camera.left = -lightRange;
     moonLight.shadow.camera.right = lightRange;
     moonLight.shadow.camera.top = lightRange;
     moonLight.shadow.camera.bottom = -lightRange;
-    
+
     ////////////
     //sun&moon//
     ////////////
@@ -114,7 +97,7 @@ function init(){
     var geometry = new THREE.SphereGeometry( 60, 16, 16 );
 
     var Sun = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: 0xFFFF33, vertexColors: THREE.FaceColors } ) );
-    var Moon = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( {map: loader.load(moon)} ) );
+    var Moon = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( {map: loader.load("/img/moon.jpg")} ) );
     Sun.position.set(0, -spinRadius, 0);
     Moon.position.set(0, spinRadius, 0)
 
@@ -161,22 +144,27 @@ function init(){
     //Loader//
     //////////
 
+    var onProgress = function ( xhr ) {
+      if ( xhr.lengthComputable ) {
+        var percentComplete = xhr.loaded / xhr.total * 100;
+        console.log( Math.round(percentComplete, 2) + '% downloaded' );
+      }
+    };
+
+    var onError = function ( xhr ) { };
+
     // load a resource
-    var objLoader = new OBJLoader();
-    var mtlLoader = new MTLLoader();
-    mtlLoader.setBaseUrl( '../models/' );
-    mtlLoader.setPath( '../models/' );
-    var url = "Paris2010.mtl";
+    var objLoader = new THREE.OBJLoader();
+    var mtlLoader = new THREE.MTLLoader();
+    mtlLoader.setTexturePath( '/models/' );
+    mtlLoader.setPath( '/models/' );
 
-
-    mtlLoader.load( parisMTL, function( materials ) {
+    mtlLoader.load( "Paris2010.mtl", function( materials ) {
 
         materials.preload();
-
-        var objLoader = new THREE.OBJLoader();
         objLoader.setMaterials( materials );
-        objLoader.setPath( '../models/' );
-        objLoader.load( parisOBJ, function ( object ) {
+        objLoader.setPath( '/models/' );
+        objLoader.load( "Paris2010_0.obj", function ( object ) {
 
             scene.add( object );
 
