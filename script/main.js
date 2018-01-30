@@ -6,6 +6,7 @@ var manual = false, speedUp = true;
 var loader = new THREE.TextureLoader();
 var worldWidth = boxSize, worldDepth = boxSize;
 var worldHalfWidth = worldWidth/2, worldHalfDepth = worldDepth / 2;
+var city;
 
 init();
 
@@ -17,9 +18,9 @@ function init(){
     //camera//
     //////////
 
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 50, 20000 );
-    camera.position.z = -1000;
-    camera.position.y = 1000;
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.01, 200000 );
+    camera.position.z = -100;
+    camera.position.y = 100;
 
     ////////////
     //renderer//
@@ -123,7 +124,7 @@ function init(){
     //fog//
     ///////
 
-    scene.fog = new THREE.FogExp2( 0xAAAAAA, 0.00001 );
+    scene.fog = new THREE.FogExp2( 0xefd1b5, 0.0005 );
 
     //////////
     //skyBox//
@@ -147,7 +148,8 @@ function init(){
     var onProgress = function ( xhr ) {
       if ( xhr.lengthComputable ) {
         var percentComplete = xhr.loaded / xhr.total * 100;
-        console.log( Math.round(percentComplete, 2) + '% downloaded' );
+        var text = document.getElementsByClassName("text")[0];
+        text.innerHTML = Math.round(percentComplete, 2) + '% Downloaded';
       }
     };
 
@@ -165,9 +167,11 @@ function init(){
         objLoader.setMaterials( materials );
         objLoader.setPath( '/models/' );
         objLoader.load( "Paris2010_0.obj", function ( object ) {
-
-            scene.add( object );
-
+            city = object;
+            scene.add( city );
+            city.castShadow = true;
+            city.receiveShadow = true;
+            fadeOut(document.getElementsByClassName("loading")[0]);
         }, onProgress, onError );
 
     });
@@ -238,6 +242,19 @@ function init(){
     window.addEventListener('resize', onWindowResize, false);
 }
 
+
+function fadeOut(element) {
+    var op = 1;  // initial opacity
+    var timer = setInterval(function () {
+        if (op <= 0.1){
+            clearInterval(timer);
+            element.style.display = 'none';
+        }
+        element.style.opacity = op;
+        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        op -= op * 0.1;
+    }, 50);
+}
 
 function sunUpdate(){
 
