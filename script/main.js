@@ -149,9 +149,9 @@ function init(){
     //////////
 
     var mesh = new THREE.City({
-                                  thirdLayerObject: ["Paris2010_0.obj"],
-                                  thirdLayerTexture: ["Paris2010.mtl"],
-                                  modelPath: ["paris"]
+                                  thirdLayerObject: ["Paris2010_0.obj", "Medieval_City.obj"],
+                                  thirdLayerTexture: ["Paris2010.mtl", "Medieval_City.mtl"],
+                                  modelPath: ["paris", "medieval"]
                               });
 
     /////////

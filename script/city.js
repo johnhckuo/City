@@ -69,6 +69,7 @@ THREE.City.prototype.loading = async function(){
     function onError( xhr ) { };
 
     function loadingFadeOut(element) {
+
         var op = 1;  // initial opacity
         var timer = setInterval(function () {
             if (op <= 0.1){
@@ -84,27 +85,44 @@ THREE.City.prototype.loading = async function(){
     var objLoader = new THREE.OBJLoader();
     var mtlLoader = new THREE.MTLLoader();
 
-    for (var i = 0 ; i < this.thirdLayerObject.length ; i++){
-        objLoader.setPath( this.baseModelPath + this.modelPath[i] + "/" );
-        mtlLoader.setTexturePath( this.baseModelPath + this.modelPath[i] + "/" );
-        mtlLoader.setPath( this.baseModelPath + this.modelPath[i] + "/" );
+    function loadObj(index){
 
-        mtlLoader.load( this.thirdLayerTexture[i], function( materials ) {
+        var modelPath = this.modelPath[index];
+        var baseModelPath = this.baseModelPath;
+        var mtl = this.thirdLayerTexture[index];
+
+        return new Promise(function(resolve, reject){
+            objLoader.setPath( baseModelPath + modelPath + "/" );
+            mtlLoader.setTexturePath( baseModelPath + modelPath + "/" );
+            mtlLoader.setPath( baseModelPath + modelPath + "/" );
+
+            mtlLoader.load( mtl, function( materials ) {
+                resolve(materials);
+            });
+        });
+
+    }
+
+    function loadMtl(index, materials){
+
+        var obj = this.thirdLayerObject[index];
+        return new Promise(function(resolve, reject){
 
             materials.preload();
             objLoader.setMaterials( materials );
-            objLoader.load( this.thirdLayerObject[i], function ( object ) {
-                city = object.clone();
-                city.castShadow = true;
-                city.receiveShadow = true;
-
-                scene.add( city );
-                loadingFadeOut(document.getElementsByClassName("loading")[0]);
+            objLoader.load( obj, function ( object ) {
+                scene.add( object );
+                resolve("success");
             }, onProgress, onError );
 
-        });
+        })
     }
 
+    for (var i = 0 ; i < this.thirdLayerObject.length ; i++){
+        var materials = await loadObj.call(this, i);
+        await loadMtl.call(this, i, materials);
+    }
+    loadingFadeOut(document.getElementsByClassName("loading")[0]);
 
 }
 
