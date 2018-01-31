@@ -91,6 +91,9 @@ function init(){
     moonLight.shadow.camera.top = lightRange;
     moonLight.shadow.camera.bottom = -lightRange;
 
+    var helper = new THREE.CameraHelper( sunLight.shadow.camera );
+    scene.add( helper );
+
     ////////////
     //sun&moon//
     ////////////
@@ -145,36 +148,11 @@ function init(){
     //Loader//
     //////////
 
-    var onProgress = function ( xhr ) {
-      if ( xhr.lengthComputable ) {
-        var percentComplete = xhr.loaded / xhr.total * 100;
-        var text = document.getElementsByClassName("text")[0];
-        text.innerHTML = Math.round(percentComplete, 2) + '% Downloaded';
-      }
-    };
-
-    var onError = function ( xhr ) { };
-
-    // load a resource
-    var objLoader = new THREE.OBJLoader();
-    var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setTexturePath( '/models/' );
-    mtlLoader.setPath( '/models/' );
-
-    mtlLoader.load( "Paris2010.mtl", function( materials ) {
-
-        materials.preload();
-        objLoader.setMaterials( materials );
-        objLoader.setPath( '/models/' );
-        objLoader.load( "Paris2010_0.obj", function ( object ) {
-            city = object;
-            scene.add( city );
-            city.castShadow = true;
-            city.receiveShadow = true;
-            fadeOut(document.getElementsByClassName("loading")[0]);
-        }, onProgress, onError );
-
-    });
+    var mesh = new THREE.City({
+                                  thirdLayerObject: ["Paris2010_0.obj"],
+                                  thirdLayerTexture: ["Paris2010.mtl"],
+                                  modelPath: ["paris"]
+                              });
 
     /////////
     //panel//
@@ -240,6 +218,23 @@ function init(){
 
     render();
     window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener("mouseup", isInFrustum, false);
+    window.addEventListener("scroll", isInFrustum, false);
+
+
+}
+
+function isInFrustum(){
+    if (typeof city == "undefined") return;
+
+    camera.updateMatrix();
+    camera.updateMatrixWorld();
+    camera.matrixWorldInverse.getInverse( camera.matrixWorld );
+
+    var frustum = new THREE.Frustum();
+    frustum.setFromMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
+    var isSeen = frustum.intersectsBox( new THREE.Box3().setFromObject(city) );
+    console.log(isSeen)
 }
 
 
